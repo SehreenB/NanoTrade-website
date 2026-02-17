@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>NanoTrade — Intelligent HFT ASIC</title>
+<meta name="description" content="Ultra-low-latency order matching with real-time on-chip anomaly detection. 100ns matching. 10M orders/sec. $500/unit."/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{background:#0D1016;color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* TYPE */
+.t-hero{font-size:clamp(3rem,8vw,7.5rem);font-weight:500;line-height:.93;letter-spacing:-.03em}
+.t-h2{font-size:clamp(2rem,4.5vw,3.8rem);font-weight:500;line-height:1;letter-spacing:-.025em}
+.t-h3{font-size:clamp(1.1rem,2vw,1.6rem);font-weight:500;line-height:1.1;letter-spacing:-.015em}
+.t-label{font-size:.68rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.t-body{font-size:clamp(.85rem,1.4vw,.95rem);line-height:1.7;color:rgba(255,255,255,.45);font-weight:400}
+.t-small{font-size:.7rem;color:rgba(255,255,255,.25);line-height:1.5}
+.t-mono{font-family:'SF Mono','Fira Code',monospace;font-size:.72rem;letter-spacing:.04em}
+
+/* LAYOUT */
+.o-container{max-width:1280px;margin:0 auto;padding:0 48px}
+.o-section{padding:100px 0}
+
+/* NAV */
+.c-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:58px;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(13,16,22,.9);backdrop-filter:blur(20px)}
+.c-nav__logo{font-size:.88rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.c-nav__logo span{color:rgba(255,255,255,.3)}
+.c-nav__links{display:flex;align-items:center;gap:28px}
+.c-nav__link{font-size:.78rem;color:rgba(255,255,255,.4);transition:color .15s}
+.c-nav__link:hover{color:#fff}
+.c-nav__cta{font-size:.78rem;font-weight:500;padding:7px 18px;background:#fff;color:#0D1016;border-radius:2px;transition:opacity .15s}
+.c-nav__cta:hover{opacity:.85}
+
+/* BUTTONS */
+.c-btn{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;font-weight:500;padding:11px 22px;border-radius:2px;cursor:pointer;border:none;transition:all .15s}
+.c-btn.u1{background:#fff;color:#0D1016}.c-btn.u1:hover{opacity:.88}
+.c-btn.u2{background:transparent;color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.1)}.c-btn.u2:hover{border-color:rgba(255,255,255,.25);color:#fff}
+.c-btns{display:flex;gap:10px;flex-wrap:wrap}
+.ico16{width:14px;height:14px;flex-shrink:0}
+
+/* HERO */
+.c-hero{padding-top:148px;padding-bottom:0}
+.c-hero__tp{padding:0 48px;max-width:1280px;margin:0 auto}
+.c-hero__bt{display:flex;justify-content:space-between;align-items:flex-end;padding:44px 48px 0;max-width:1280px;margin:0 auto}
+.c-hero__desc{max-width:360px;text-align:right}
+.c-hero__canvas-wrap{margin-top:72px;height:320px;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);position:relative}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+.c-hero__fade{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,#0D1016 100%);pointer-events:none}
+
+/* RAIL */
+.c-rail{border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);overflow:hidden;padding:18px 0}
+.c-rail__track{display:flex;animation:rail 28s linear infinite}
+.c-rail__item{display:flex;align-items:center;gap:14px;padding:0 44px;border-right:1px solid rgba(255,255,255,.05);white-space:nowrap}
+.c-rail__val{font-size:1.35rem;font-weight:500;letter-spacing:-.02em}
+.c-rail__lbl{font-size:.65rem;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.25)}
+@keyframes rail{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION HEADER */
+.c-sec-header{display:grid;grid-template-columns:220px 1fr;gap:80px;padding:80px 0 60px;align-items:start}
+.c-sec-header.no-sidebar{grid-template-columns:1fr;gap:0}
+
+/* SUBSYSTEMS */
+.c-sub__line{height:1px;background:rgba(255,255,255,.06);margin-bottom:0}
+.c-sub__grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.06)}
+.c-sub__item{padding:36px 32px;border-right:1px solid rgba(255,255,255,.06)}
+.c-sub__item:last-child{border-right:none}
+.c-sub__nmb{margin-bottom:20px}
+.c-sub__icon{opacity:.35;margin-bottom:14px}
+.c-sub__label{margin-bottom:10px}
+.c-sub__desc{font-size:.8rem;line-height:1.65;color:rgba(255,255,255,.3)}
+
+/* FEATURES TWO-COL */
+.c-feat{border-top:1px solid rgba(255,255,255,.06)}
+.c-feat__wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;padding-top:80px;align-items:start}
+.c-feat__lft{position:sticky;top:80px}
+.c-feat__lft h2{margin-bottom:20px}
+.c-feat__lft .t-body{margin-bottom:36px}
+.c-feat__rgt__head{display:grid;grid-template-columns:1fr 180px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.c-feat__rgt__head span{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2)}
+.c-feat__row{display:grid;grid-template-columns:1fr 180px;align-items:start;padding:26px 0;border-bottom:1px solid rgba(255,255,255,.05);gap:20px}
+.c-feat__row__lft{display:flex;gap:14px;align-items:flex-start}
+.c-feat__row__nmb{font-size:.62rem;color:rgba(255,255,255,.2);padding-top:3px;flex-shrink:0;letter-spacing:.04em}
+.c-feat__row__title{font-size:.95rem;font-weight:500;line-height:1.25;letter-spacing:-.01em}
+.c-feat__row__title span{display:block;color:rgba(255,255,255,.28)}
+.c-feat__row__sub{font-size:.75rem;color:rgba(255,255,255,.3);line-height:1.5;margin-top:4px}
+.c-feat__row__inf{font-size:.75rem;color:rgba(255,255,255,.35);line-height:1.5;padding-top:3px}
+.c-feat__dot{width:5px;height:5px;border-radius:50%;background:#fff;margin-top:8px;animation:flick 2.5s ease-in-out infinite}
+@keyframes flick{0%,100%{opacity:1}48%{opacity:1}52%{opacity:.1}56%{opacity:1}}
+
+/* LIVE DEMO */
+.c-demo{border-top:1px solid rgba(255,255,255,.06);background:#0b0e15}
+.c-demo__head{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:48px}
+.c-demo__grid{display:grid;grid-template-columns:1fr 1.9fr 1fr;gap:1px;background:rgba(255,255,255,.05)}
+.c-demo__panel{background:#0b0e15;padding:22px}
+.c-panel__title{font-size:.58rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.c-live{display:flex;align-items:center;gap:5px;font-size:.58rem;letter-spacing:.07em}
+.c-live__dot{width:4px;height:4px;border-radius:50%;background:#4ade80;animation:flick 1.3s ease-in-out infinite}
+
+/* order book */
+.ob{font-family:'SF Mono','Fira Code',monospace;font-size:.66rem}
+.ob-row{display:flex;justify-content:space-between;padding:2.5px 0;color:rgba(255,255,255,.45)}
+.ob-row.ask{color:#f87171}.ob-row.bid{color:#4ade80}
+.ob-spread{text-align:center;padding:5px 0;font-size:.56rem;letter-spacing:.08em;color:rgba(255,255,255,.2);border-top:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);margin:3px 0}
+
+/* chart */
+#demo-chart{width:100%;height:175px;margin-bottom:1px}
+
+/* metric grid */
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.05)}
+.m-box{background:#0b0e15;padding:11px 13px}
+.m-lbl{font-size:.53rem;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:4px}
+.m-val{font-size:1rem;font-weight:500;letter-spacing:-.01em}
+
+/* latency widget */
+.lat-box{border:1px solid rgba(255,255,255,.05);padding:18px;text-align:center;margin-top:14px}
+.lat-val{font-size:2.8rem;font-weight:300;letter-spacing:-.04em;line-height:1}
+.lat-unit{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:3px}
+.lat-bar-wrap{height:1px;background:rgba(255,255,255,.06);margin-top:10px;overflow:hidden}
+.lat-bar{height:100%;background:rgba(255,255,255,.5);transition:width .9s ease}
+.lat-thr{font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:6px}
+
+/* anomaly */
+.ano-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-family:'SF Mono','Fira Code',monospace;font-size:.6rem;animation:ain .3s ease both}
+.ano-item:last-child{border-bottom:none}
+.ano-bar{width:2px;flex-shrink:0;align-self:stretch;border-radius:1px;margin-top:1px}
+.ano-time{color:rgba(255,255,255,.18);flex-shrink:0;min-width:50px}
+.ano-txt{color:rgba(255,255,255,.45);line-height:1.4}
+.ano-item.g .ano-bar{background:#4ade80}.ano-item.y .ano-bar{background:#facc15}
+.ano-item.o .ano-bar{background:#fb923c}.ano-item.r .ano-bar{background:#f87171}
+.ano-item.r .ano-txt{color:#f87171}.ano-item.o .ano-txt{color:#fb923c}
+@keyframes ain{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
+
+/* ARCHITECTURE */
+.c-arch{border-top:1px solid rgba(255,255,255,.06)}
+.c-arch__wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;padding-top:80px;padding-bottom:100px}
+.c-arch__lft{position:sticky;top:80px}
+.c-arch__lft h2{margin-bottom:20px}
+.c-arch__lft .t-body{margin-bottom:36px}
+.c-spec__row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.c-spec__key{font-size:.82rem;color:rgba(255,255,255,.35)}
+.c-spec__val{font-family:'SF Mono','Fira Code',monospace;font-size:.72rem;color:rgba(255,255,255,.6)}
+.c-chip-box{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);padding:28px;margin-top:40px}
+.c-chip-box svg{width:100%}
+
+/* FOR */
+.c-for{border-top:1px solid rgba(255,255,255,.06)}
+.c-for__inner{padding:80px 0}
+.c-for__lbl{margin-bottom:40px}
+.c-for__item{display:flex;gap:60px;align-items:baseline;padding:36px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.c-for__item:last-child{border-bottom:none}
+.c-for__item__tag{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);flex-shrink:0;width:190px}
+.c-for__item__txt{font-size:clamp(1rem,2.2vw,1.5rem);font-weight:400;line-height:1.25;letter-spacing:-.015em;color:rgba(255,255,255,.6)}
+
+/* FAQ */
+.c-faq{border-top:1px solid rgba(255,255,255,.06)}
+.c-faq__wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;padding-top:80px;padding-bottom:100px;align-items:start}
+.c-faq__lft{position:sticky;top:80px}
+.c-faq__lft h2{margin-bottom:16px}
+.faq-item{border-top:1px solid rgba(255,255,255,.05)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 0;cursor:pointer}
+.faq-q__txt{font-size:.88rem;color:rgba(255,255,255,.55);transition:color .15s;line-height:1.4}
+.faq-q:hover .faq-q__txt{color:#fff}
+.faq-plus{position:relative;width:14px;height:14px;flex-shrink:0;opacity:.35}
+.faq-plus::before,.faq-plus::after{content:'';position:absolute;background:#fff;border-radius:1px}
+.faq-plus::before{width:12px;height:1px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.faq-plus::after{width:1px;height:12px;top:50%;left:50%;transform:translate(-50%,-50%);transition:transform .22s,opacity .22s}
+.faq-item.open .faq-plus::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .32s ease}
+.faq-a__txt{padding-bottom:22px;font-size:.82rem;line-height:1.75;color:rgba(255,255,255,.35)}
+
+/* FOOTER CTA */
+.c-ftrcta{border-top:1px solid rgba(255,255,255,.06);padding:110px 48px;text-align:center}
+.c-ftrcta h2{max-width:660px;margin:0 auto 36px}
+.c-ftrcta__btns{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+
+/* FOOTER */
+.c-footer{border-top:1px solid rgba(255,255,255,.06);padding:56px 0 36px}
+.c-footer__main{display:grid;grid-template-columns:160px 1fr 1fr 200px;gap:40px;padding-bottom:56px;border-bottom:1px solid rgba(255,255,255,.05)}
+.c-footer__nav-title{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:14px}
+.c-footer__nav-link{display:block;font-size:.78rem;color:rgba(255,255,255,.35);padding:4px 0;transition:color .15s}
+.c-footer__nav-link:hover{color:#fff}
+.c-footer__form{display:flex}
+.c-footer__form input[type=email]{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-right:none;padding:9px 14px;font-size:.78rem;color:#fff;outline:none;border-radius:2px 0 0 2px;font-family:inherit}
+.c-footer__form input::placeholder{color:rgba(255,255,255,.2)}
+.c-footer__form button{background:#fff;color:#0D1016;border:none;padding:9px 14px;font-size:.75rem;font-weight:500;cursor:pointer;border-radius:0 2px 2px 0;transition:opacity .15s}
+.c-footer__form button:hover{opacity:.85}
+.c-footer__btm{display:flex;justify-content:space-between;align-items:center;padding-top:20px}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  .c-nav__links{display:none}
+  .c-hero__bt{flex-direction:column;gap:24px;align-items:flex-start}
+  .c-hero__desc{text-align:left;max-width:100%}
+  .c-sec-header,.c-feat__wrap,.c-arch__wrap,.c-faq__wrap{grid-template-columns:1fr;gap:40px}
+  .c-feat__lft,.c-arch__lft,.c-faq__lft{position:static}
+  .c-sub__grid{grid-template-columns:1fr}
+  .c-sub__item{border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
+  .c-sub__item:last-child{border-bottom:none}
+  .c-demo__grid{grid-template-columns:1fr}
+  .c-for__item{flex-direction:column;gap:6px}
+  .c-for__item__tag{width:auto}
+  .c-footer__main{grid-template-columns:1fr 1fr}
+  .o-container,.c-hero__tp,.c-hero__bt,.c-ftrcta,.c-nav{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="c-nav">
+  <div class="c-nav__logo">Nano<span>Trade</span></div>
+  <div class="c-nav__links">
+    <a href="#features" class="c-nav__link">Features</a>
+    <a href="#demo" class="c-nav__link">Live Demo</a>
+    <a href="#architecture" class="c-nav__link">Architecture</a>
+    <a href="#faq" class="c-nav__link">FAQ</a>
+    <a href="#contact" class="c-nav__cta">Request Chip</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header>
+  <div class="c-hero">
+    <div class="c-hero__tp">
+      <h1 class="t-hero">The Intelligent<br/>HFT Matching Engine<br/>on a Single ASIC</h1>
+    </div>
+    <div class="c-hero__bt">
+      <div class="c-btns">
+        <a href="#demo" class="c-btn u1">See Live Demo <svg class="ico16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a href="#features" class="c-btn u2">Technical Specs</a>
+      </div>
+      <p class="t-body c-hero__desc">100ns order matching · On-chip ML anomaly detection · $500/unit vs $50,000 FPGA</p>
+    </div>
+    <div class="c-hero__canvas-wrap">
+      <canvas id="hero-canvas"></canvas>
+      <div class="c-hero__fade"></div>
+    </div>
+  </div>
+</header>
+
+<!-- RAIL -->
+<div class="c-rail">
+  <div class="c-rail__track">
+    <div class="c-rail__item"><span class="c-rail__val">100ns</span><span class="c-rail__lbl">Match Latency</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">10M</span><span class="c-rail__lbl">Orders / Sec</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">8mW</span><span class="c-rail__lbl">Active Power</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">$500</span><span class="c-rail__lbl">Per Unit</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">95%+</span><span class="c-rail__lbl">ML Sensitivity</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">250ns</span><span class="c-rail__lbl">Anomaly Detection</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">400MHz</span><span class="c-rail__lbl">Clock Frequency</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">130nm</span><span class="c-rail__lbl">Sky130 PDK</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">100ns</span><span class="c-rail__lbl">Match Latency</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">10M</span><span class="c-rail__lbl">Orders / Sec</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">8mW</span><span class="c-rail__lbl">Active Power</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">$500</span><span class="c-rail__lbl">Per Unit</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">95%+</span><span class="c-rail__lbl">ML Sensitivity</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">250ns</span><span class="c-rail__lbl">Anomaly Detection</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">400MHz</span><span class="c-rail__lbl">Clock Frequency</span></div>
+    <div class="c-rail__item"><span class="c-rail__val">130nm</span><span class="c-rail__lbl">Sky130 PDK</span></div>
+  </div>
+</div>
+
+<!-- SUBSYSTEMS -->
+<section class="o-section" id="subsystems">
+  <div class="o-container">
+    <div class="c-sec-header" style="padding-top:0">
+      <div><p class="t-label" style="margin-bottom:12px">Subsystems</p><h2 class="t-h2">Three chips.<br/>One die.</h2></div>
+      <p class="t-body" style="padding-top:6px">NanoTrade integrates order matching, feature extraction, and ML inference on a single 130nm ASIC — eliminating inter-chip latency and reducing cost by 100×.</p>
+    </div>
+    <div class="c-sub__line"></div>
+    <div class="c-sub__grid">
+      <div class="c-sub__item">
+        <p class="t-label c-sub__nmb">/01</p>
+        <svg class="c-sub__icon" width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke="white" stroke-width="1.2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke="white" stroke-width="1.2"/><path d="M17.5 14v7M14 17.5h7" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+        <h3 class="t-h3 c-sub__label">Order Matching<br/>Engine</h3>
+        <p class="c-sub__desc">Binary heap order books, CAM for O(1) cancellation, price-time priority. 50–100ns per match at 10M ops/sec.</p>
+      </div>
+      <div class="c-sub__item">
+        <p class="t-label c-sub__nmb">/02</p>
+        <svg class="c-sub__icon" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 12l4-4 4 4 4-6 4 6" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 20h18" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".35"/></svg>
+        <h3 class="t-h3 c-sub__label">ML Anomaly<br/>Detector</h3>
+        <p class="c-sub__desc">16→8→6 MLP on fixed-point arithmetic. Detects 6 anomaly classes including flash crashes and spoofing in under 250ns.</p>
+      </div>
+      <div class="c-sub__item">
+        <p class="t-label c-sub__nmb">/03</p>
+        <svg class="c-sub__icon" width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="white" stroke-width="1.2"/><path d="M12 8v5l3 2" stroke="white" stroke-width="1.2" stroke-linecap="round"/><path d="M4.5 4.5l2 2M17.5 4.5l-2 2" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity=".35"/></svg>
+        <h3 class="t-h3 c-sub__label">Circuit Breaker<br/>&amp; Risk Manager</h3>
+        <p class="c-sub__desc">4-tier alert system (GREEN → RED). Automatic trading halt within 1ms of confirmed anomaly. On-chip regulatory logging.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="o-section c-feat" id="features">
+  <div class="o-container">
+    <div class="c-feat__wrap">
+      <div class="c-feat__lft">
+        <p class="t-label" style="margin-bottom:14px">Core Capabilities</p>
+        <h2 class="t-h2">The Only ASIC You Need For HFT Infrastructure</h2>
+        <p class="t-body">NanoTrade delivers fast, reliable order processing with integrated protection — enabling exchanges to focus on markets instead of infrastructure.</p>
+        <div class="c-btns">
+          <a href="#demo" class="c-btn u1">See Live Demo <svg class="ico16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a href="#contact" class="c-btn u2">Request Chip</a>
+        </div>
+      </div>
+      <div class="c-feat__rgt">
+        <div class="c-feat__rgt__head"><span>Advantages</span><span>Details</span></div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/01</span><div><div class="c-feat__row__title">Ultra-Low<br/><span>Latency</span></div><p class="c-feat__row__sub">1000× faster than software matching</p></div></div>
+          <div><div class="c-feat__row__inf">50–100 ns<br/>per match</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/02</span><div><div class="c-feat__row__title">On-Chip<br/><span>ML Inference</span></div><p class="c-feat__row__sub">No external servers — zero inter-chip latency</p></div></div>
+          <div><div class="c-feat__row__inf">16→8→6 MLP<br/>32KB ROM</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/03</span><div><div class="c-feat__row__title">Radical<br/><span>Cost Reduction</span></div><p class="c-feat__row__sub">100× cheaper than FPGA at scale</p></div></div>
+          <div><div class="c-feat__row__inf">$500/unit<br/>vs $50,000</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/04</span><div><div class="c-feat__row__title">Power<br/><span>Efficiency</span></div><p class="c-feat__row__sub">1,875× lower power than competing FPGAs</p></div></div>
+          <div><div class="c-feat__row__inf">8mW active<br/>100µW sleep</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/05</span><div><div class="c-feat__row__title">6 Anomaly<br/><span>Classes</span></div><p class="c-feat__row__sub">Flash crash, spoofing, wash trading, pump &amp; dump, liquidity crisis, volatility spike</p></div></div>
+          <div><div class="c-feat__row__inf">95% sensitivity<br/>98% specificity</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/06</span><div><div class="c-feat__row__title">Automatic<br/><span>Circuit Breakers</span></div><p class="c-feat__row__sub">Tiered halt triggers before damage spreads</p></div></div>
+          <div><div class="c-feat__row__inf">4-tier alert<br/>&lt;1ms HALT</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/07</span><div><div class="c-feat__row__title">Regulatory<br/><span>Compliance</span></div><p class="c-feat__row__sub">On-chip FIFO logging for SEC/FINRA audit trails</p></div></div>
+          <div><div class="c-feat__row__inf">FIFO buffer<br/>on-chip</div><div class="c-feat__dot"></div></div>
+        </div>
+        <div class="c-feat__row">
+          <div class="c-feat__row__lft"><span class="c-feat__row__nmb">/08</span><div><div class="c-feat__row__title">Open Silicon<br/><span>Process</span></div><p class="c-feat__row__sub">Sky130 PDK via TinyTapeout — open and reproducible</p></div></div>
+          <div><div class="c-feat__row__inf">130nm<br/>2–3mm² die</div><div class="c-feat__dot"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="o-section c-demo" id="demo">
+  <div class="o-container">
+    <div class="c-demo__head">
+      <div><p class="t-label" style="margin-bottom:12px">Live Simulation</p><h2 class="t-h2">Watch It<br/>Process Markets</h2></div>
+      <p class="t-body" style="max-width:300px;text-align:right">Orders matched, anomalies detected, circuit breakers armed — all real-time.</p>
+    </div>
+    <div class="c-demo__grid">
+      <div class="c-demo__panel">
+        <div class="c-panel__title">Order Book — AAPL <div class="c-live"><div class="c-live__dot"></div>LIVE</div></div>
+        <div id="ob"></div>
+        <div class="lat-box">
+          <div class="lat-val" id="lat-val">73</div>
+          <div class="lat-unit">Nanoseconds / Match</div>
+          <div class="lat-bar-wrap"><div class="lat-bar" id="lat-bar" style="width:73%"></div></div>
+          <div class="lat-thr" id="lat-thr">7.3M OPS / SEC</div>
+        </div>
+      </div>
+      <div class="c-demo__panel">
+        <div class="c-panel__title">Price Feed <div class="c-live"><div class="c-live__dot"></div>STREAMING</div></div>
+        <canvas id="demo-chart"></canvas>
+        <div class="m-grid">
+          <div class="m-box"><div class="m-lbl">Last Price</div><div class="m-val" id="m-price">$184.32</div></div>
+          <div class="m-box"><div class="m-lbl">Spread</div><div class="m-val" id="m-spread">$0.03</div></div>
+          <div class="m-box"><div class="m-lbl">Volume (1s)</div><div class="m-val" id="m-vol">482K</div></div>
+          <div class="m-box"><div class="m-lbl">Volatility</div><div class="m-val" id="m-vix">0.43%</div></div>
+        </div>
+      </div>
+      <div class="c-demo__panel">
+        <div class="c-panel__title">ML Detector <div class="c-live"><div class="c-live__dot"></div>ACTIVE</div></div>
+        <div class="m-grid">
+          <div class="m-box"><div class="m-lbl">Sensitivity</div><div class="m-val" style="color:#4ade80">95.2%</div></div>
+          <div class="m-box"><div class="m-lbl">Specificity</div><div class="m-val" style="color:#4ade80">98.1%</div></div>
+        </div>
+        <div class="m-box" style="border:1px solid rgba(255,255,255,.05);padding:11px 13px;margin-top:1px">
+          <div class="m-lbl">Circuit Breaker</div>
+          <div class="m-val" id="cb-status" style="color:#4ade80">GREEN — NORMAL</div>
+        </div>
+        <div style="margin-top:14px">
+          <p class="t-small" style="margin-bottom:8px;letter-spacing:.07em;text-transform:uppercase">Detection Log</p>
+          <div id="ano-feed"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="o-section c-arch" id="architecture">
+  <div class="o-container">
+    <p class="t-label" style="margin-bottom:0;padding-top:0">Silicon Architecture</p>
+    <div class="c-arch__wrap">
+      <div class="c-arch__lft">
+        <h2 class="t-h2">Built for<br/>Nanoseconds</h2>
+        <p class="t-body">Three subsystems on a single 130nm die. 2–3mm². 400MHz. 8mW active power.</p>
+        <div>
+          <div class="c-spec__row"><span class="c-spec__key">Technology Node</span><span class="c-spec__val">Sky130 PDK — 130nm</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Clock Frequency</span><span class="c-spec__val">400 MHz</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Gate Count</span><span class="c-spec__val">50,000–80,000</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Die Area</span><span class="c-spec__val">2–3 mm²</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">SRAM</span><span class="c-spec__val">256 KB (order books)</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">ROM</span><span class="c-spec__val">32 KB (ML weights)</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Active Power</span><span class="c-spec__val">8–15 mW</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Sleep Power</span><span class="c-spec__val">100 µW</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">ML Model</span><span class="c-spec__val">16 → 8 → 6 MLP</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Precision</span><span class="c-spec__val">16-bit fixed-point</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Order Bus</span><span class="c-spec__val">64-bit input</span></div>
+          <div class="c-spec__row"><span class="c-spec__key">Trade Bus</span><span class="c-spec__val">128-bit output</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="c-chip-box">
+          <svg viewBox="0 0 500 420" fill="none">
+            <rect x="30" y="16" width="440" height="388" rx="3" fill="rgba(255,255,255,.015)" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <rect x="42" y="28" width="416" height="364" rx="2" fill="none" stroke="rgba(255,255,255,.03)" stroke-width="1" stroke-dasharray="4 4"/>
+            <!-- Matching Engine -->
+            <rect x="58" y="44" width="190" height="118" rx="2" fill="rgba(255,255,255,.025)" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+            <text x="153" y="68" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.45)" text-anchor="middle" letter-spacing="1.5">MATCHING ENGINE</text>
+            <text x="153" y="86" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.22)" text-anchor="middle">Binary Heap · CAM · 4096 Orders</text>
+            <text x="153" y="100" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.22)" text-anchor="middle">Price-Time Priority · 256KB SRAM</text>
+            <text x="153" y="150" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.55)" text-anchor="middle">10M OPS / SEC</text>
+            <!-- Feat Extractor -->
+            <rect x="268" y="44" width="184" height="118" rx="2" fill="rgba(255,255,255,.015)" stroke="rgba(255,255,255,.07)" stroke-width="1"/>
+            <text x="360" y="68" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.35)" text-anchor="middle" letter-spacing="1.5">FEAT EXTRACTOR</text>
+            <text x="360" y="86" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.18)" text-anchor="middle">16 Market Metrics</text>
+            <text x="360" y="100" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.18)" text-anchor="middle">Spread · Vol · Cancel Rate · Imbalance</text>
+            <!-- ML Classifier -->
+            <rect x="158" y="208" width="184" height="96" rx="2" fill="rgba(255,255,255,.025)" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+            <text x="250" y="232" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.45)" text-anchor="middle" letter-spacing="1.5">ML CLASSIFIER</text>
+            <text x="250" y="250" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.22)" text-anchor="middle">3-Layer MLP · 16 → 8 → 6</text>
+            <text x="250" y="264" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.22)" text-anchor="middle">16-bit fixed-point · 32KB ROM</text>
+            <text x="250" y="292" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.55)" text-anchor="middle">100–250 ns INFERENCE</text>
+            <!-- Circuit Breaker -->
+            <rect x="158" y="348" width="184" height="56" rx="2" fill="rgba(255,255,255,.015)" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+            <text x="250" y="370" font-family="monospace" font-size="7.5" fill="rgba(255,255,255,.4)" text-anchor="middle" letter-spacing="1.5">CIRCUIT BREAKER</text>
+            <text x="250" y="388" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.18)" text-anchor="middle">GREEN · YELLOW · ORANGE · RED · HALT</text>
+            <!-- SRAM -->
+            <rect x="58" y="208" width="78" height="50" rx="2" fill="rgba(255,255,255,.015)" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+            <text x="97" y="230" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.2)" text-anchor="middle">SRAM</text>
+            <text x="97" y="245" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.35)" text-anchor="middle">256 KB</text>
+            <!-- ROM -->
+            <rect x="364" y="208" width="88" height="50" rx="2" fill="rgba(255,255,255,.015)" stroke="rgba(255,255,255,.05)" stroke-width="1"/>
+            <text x="408" y="230" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.2)" text-anchor="middle">ROM</text>
+            <text x="408" y="245" font-family="monospace" font-size="6.5" fill="rgba(255,255,255,.35)" text-anchor="middle">32 KB</text>
+            <!-- Arrows -->
+            <defs>
+              <marker id="aw" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0 0L5 2.5L0 5z" fill="rgba(255,255,255,.25)"/></marker>
+              <marker id="ar" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0 0L5 2.5L0 5z" fill="rgba(248,113,113,.5)"/></marker>
+            </defs>
+            <path d="M153 162 L153 186 L250 186 L250 208" stroke="rgba(255,255,255,.18)" stroke-width="1" marker-end="url(#aw)"/>
+            <path d="M360 162 L360 186 L250 186" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+            <path d="M250 304 L250 348" stroke="rgba(255,255,255,.18)" stroke-width="1" marker-end="url(#aw)"/>
+            <path d="M158 376 L44 376 L44 103 L58 103" stroke="rgba(248,113,113,.35)" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#ar)"/>
+            <text x="18" y="84" font-family="monospace" font-size="5.5" fill="rgba(255,255,255,.15)" writing-mode="tb">ORDERS IN 64b</text>
+            <path d="M40 80 L58 80" stroke="rgba(255,255,255,.12)" stroke-width="1" marker-end="url(#aw)"/>
+            <path d="M58 130 L40 130" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+            <text x="18" y="138" font-family="monospace" font-size="5.5" fill="rgba(255,255,255,.15)" writing-mode="tb">TRADES OUT 128b</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOR -->
+<section class="o-section c-for">
+  <div class="o-container">
+    <div class="c-for__inner" style="padding:0">
+      <p class="t-label c-for__lbl">Who It's For</p>
+      <div class="c-for__item">
+        <div class="c-for__item__tag">For exchanges</div>
+        <div class="c-for__item__txt">Replace FPGAs and slow software matching engines with a single $500 ASIC that does everything.</div>
+      </div>
+      <div class="c-for__item">
+        <div class="c-for__item__tag">For HFT firms</div>
+        <div class="c-for__item__txt">Gain a 10× latency edge and built-in anomaly awareness that competing infrastructure simply cannot match.</div>
+      </div>
+      <div class="c-for__item">
+        <div class="c-for__item__tag">For regulators</div>
+        <div class="c-for__item__txt">Real-time market manipulation detection with on-chip logging, eliminating post-trade analysis delays from days to nanoseconds.</div>
+      </div>
+      <div class="c-for__item">
+        <div class="c-for__item__tag">For crypto exchanges</div>
+        <div class="c-for__item__txt">Sub-microsecond matching with automatic circuit breakers — finally bringing exchange-grade stability to crypto infrastructure.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="o-section c-faq" id="faq">
+  <div class="o-container">
+    <div class="c-faq__wrap">
+      <div class="c-faq__lft">
+        <p class="t-label" style="margin-bottom:14px">FAQ</p>
+        <h2 class="t-h2">Frequently<br/>Asked Questions</h2>
+        <p class="t-body" style="margin-top:14px">You have questions. We have answers.</p>
+      </div>
+      <div id="faq-list">
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">How does on-chip ML work without a GPU?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">The ML model is a compact 3-layer MLP (16→8→6) trained offline and quantized to 16-bit fixed-point weights stored in 32KB of on-chip ROM. Inference runs via pipelined fixed-point matrix multiplications directly in silicon — no floating point, no OS, no GPU needed. The full inference path completes in 100–250ns.</p></div></div>
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">How is NanoTrade 100× cheaper than FPGAs?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">FPGAs cost $50,000+ because they're programmable general-purpose devices. NanoTrade is a custom ASIC designed for exactly one task. At volume, ASICs are orders of magnitude cheaper. A 100-unit exchange deployment costs $50,000 with NanoTrade versus $5,000,000 with FPGAs.</p></div></div>
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">What anomalies can the chip detect?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">The 6-class MLP classifies: Flash Crashes, Spoofing (fake large orders to move prices), Pump &amp; Dump (coordinated inflation), Wash Trading (self-trades for fake volume), Liquidity Crises (evaporating order book depth), and Volatility Spikes. It monitors 16 features including price delta, volume, bid-ask spread, cancel rate, and order book imbalance.</p></div></div>
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">What happens when a RED alert triggers?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">When the circuit breaker escalates to RED, the chip sends a HALT signal back to the matching engine input within 1ms, stopping new order processing. A 5-minute cooling period timer starts. All events are logged to the on-chip FIFO audit buffer for regulatory submission and the exchange operator is simultaneously notified via the 128-bit output bus status field.</p></div></div>
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">Can the ML model be updated for new anomalies?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">The current chip uses fixed ROM weights trained on MIT/NYSE historical datasets plus synthetic anomaly scenarios. Future versions will support writable flash for field weight updates. The 16→8→6 architecture can be retrained offline and re-flashed without hardware changes.</p></div></div>
+        <div class="faq-item"><div class="faq-q"><span class="faq-q__txt">What process node is this built on?</span><div class="faq-plus"></div></div><div class="faq-a"><p class="faq-a__txt">The chip targets the Sky130 130nm open-source PDK via TinyTapeout. While 130nm is older than commercial HFT silicon, it's sufficient for this demonstrator — latency is dominated by algorithmic pipeline depth, not transistor switching speed. Production versions would target 28nm or smaller for sub-50ns matching.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<div class="c-ftrcta" id="contact">
+  <h2 class="t-h2 c-ftrcta__title c-ftrcta h2">Process Markets at the Speed of Silicon</h2>
+  <div class="c-ftrcta__btns">
+    <a href="#" class="c-btn u1">Request a Chip Sample <svg class="ico16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="#demo" class="c-btn u2">View Live Demo</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="c-footer">
+  <div class="o-container">
+    <div class="c-footer__main">
+      <div>
+        <div style="font-size:.82rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px">NanoTrade</div>
+        <p class="t-small">HFT ASIC Hackathon<br/>Sky130 PDK · 400MHz · 130nm</p>
+      </div>
+      <div>
+        <div class="c-footer__nav-title">Navigation</div>
+        <a href="#subsystems" class="c-footer__nav-link">Architecture</a>
+        <a href="#features" class="c-footer__nav-link">Features</a>
+        <a href="#demo" class="c-footer__nav-link">Live Demo</a>
+        <a href="#faq" class="c-footer__nav-link">FAQ</a>
+      </div>
+      <div>
+        <div class="c-footer__nav-title">Contacts</div>
+        <a href="mailto:team@nanotrade.io" class="c-footer__nav-link">team@nanotrade.io</a>
+        <a href="#" class="c-footer__nav-link">GitHub Repository</a>
+        <a href="#" class="c-footer__nav-link">TinyTapeout</a>
+      </div>
+      <div>
+        <div class="c-footer__nav-title">Stay updated</div>
+        <form class="c-footer__form" onsubmit="return false">
+          <input type="email" placeholder="Enter email"/>
+          <button type="submit">→</button>
+        </form>
+      </div>
+    </div>
+    <div class="c-footer__btm">
+      <p class="t-small">© 2025 NanoTrade · HFT ASIC Hackathon · All rights reserved</p>
+      <p class="t-small">100ns · 10M OPS/SEC · $500/UNIT</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── HERO CANVAS ──
+const hc=document.getElementById('hero-canvas'),hctx=hc.getContext('2d');
+function rsz(){hc.width=hc.offsetWidth;hc.height=hc.offsetHeight}rsz();window.addEventListener('resize',rsz);
+const pts=Array.from({length:55},()=>({x:Math.random()*1400,y:Math.random()*320,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.13}));
+function drawH(){
+  hc.width=hc.offsetWidth;hc.height=hc.offsetHeight;
+  const W=hc.width,H=hc.height;hctx.clearRect(0,0,W,H);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    hctx.beginPath();hctx.arc(p.x,p.y,.9,0,Math.PI*2);hctx.fillStyle='rgba(255,255,255,.3)';hctx.fill()});
+  pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<140){hctx.beginPath();hctx.moveTo(a.x,a.y);hctx.lineTo(b.x,b.y);hctx.strokeStyle=`rgba(255,255,255,${(1-d/140)*.06})`;hctx.lineWidth=.5;hctx.stroke()}}));
+  requestAnimationFrame(drawH);
+}drawH();
+
+// ── ORDER BOOK ──
+let baseP=184.32;
+function renderOB(){
+  const el=document.getElementById('ob');if(!el)return;
+  const sp=(Math.random()*.04+.01).toFixed(2);let h='';
+  for(let i=5;i>=1;i--){const p=(baseP+parseFloat(sp)/2+i*.01+Math.random()*.025).toFixed(2);const s=Math.floor(Math.random()*900+50);h+=`<div class="ob-row ask"><span>${p}</span><span>${s}</span></div>`}
+  h+=`<div class="ob-spread">SPREAD $${sp}</div>`;
+  for(let i=1;i<=5;i++){const p=(baseP-parseFloat(sp)/2-i*.01-Math.random()*.025).toFixed(2);const s=Math.floor(Math.random()*900+50);h+=`<div class="ob-row bid"><span>${p}</span><span>${s}</span></div>`}
+  el.innerHTML=h;
+  document.getElementById('m-price').textContent='$'+baseP.toFixed(2);
+  document.getElementById('m-spread').textContent='$'+sp;
+  document.getElementById('m-vol').textContent=Math.floor(Math.random()*900+150)+'K';
+  document.getElementById('m-vix').textContent=(Math.random()*.9+.1).toFixed(2)+'%';
+  const lat=Math.floor(Math.random()*52+50);
+  document.getElementById('lat-val').textContent=lat;
+  document.getElementById('lat-bar').style.width=lat+'%';
+  document.getElementById('lat-thr').textContent=(10-lat/25).toFixed(1)+'M OPS / SEC';
+}
+renderOB();setInterval(renderOB,850);
+
+// ── PRICE CHART ──
+const dc=document.getElementById('demo-chart'),dctx=dc.getContext('2d');
+const DPR=window.devicePixelRatio||1;
+function rsz2(){dc.width=dc.offsetWidth*DPR;dc.height=175*DPR;dc.style.height='175px';dctx.scale(DPR,DPR)}rsz2();
+const prices=Array.from({length:90},(_,i)=>184+Math.sin(i*.11)*1.3+Math.random()*.35);
+function drawC(){
+  const W=dc.offsetWidth,H=175;dctx.clearRect(0,0,W,H);
+  const mn=Math.min(...prices)-.3,mx=Math.max(...prices)+.3,rng=mx-mn;
+  const py=v=>H-((v-mn)/rng)*(H*.82)-H*.09,px=i=>(i/(prices.length-1))*W;
+  for(let i=1;i<4;i++){dctx.beginPath();dctx.moveTo(0,i*H/4);dctx.lineTo(W,i*H/4);dctx.strokeStyle='rgba(255,255,255,.035)';dctx.lineWidth=1;dctx.stroke()}
+  const g=dctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(255,255,255,.07)');g.addColorStop(1,'rgba(255,255,255,0)');
+  dctx.beginPath();dctx.moveTo(px(0),py(prices[0]));prices.forEach((_,i)=>{if(i>0)dctx.lineTo(px(i),py(prices[i]))});
+  dctx.lineTo(W,H);dctx.lineTo(0,H);dctx.closePath();dctx.fillStyle=g;dctx.fill();
+  dctx.beginPath();dctx.moveTo(px(0),py(prices[0]));prices.forEach((_,i)=>{if(i>0)dctx.lineTo(px(i),py(prices[i]))});
+  dctx.strokeStyle='rgba(255,255,255,.55)';dctx.lineWidth=1.1;dctx.stroke();
+  const lx=px(prices.length-1),ly=py(prices[prices.length-1]);
+  dctx.beginPath();dctx.arc(lx,ly,2.2,0,Math.PI*2);dctx.fillStyle='#fff';dctx.fill();
+}
+function tickC(){
+  let n=prices[prices.length-1]+(Math.random()-.48)*.07;
+  if(Math.random()<.025)n+=(Math.random()>.5?1:-1)*(Math.random()*.7);
+  prices.push(n);if(prices.length>90)prices.shift();baseP=n;drawC();
+}
+drawC();setInterval(tickC,220);
+
+// ── ANOMALY FEED ──
+const ANOMS=[
+  {t:'Price-time priority match confirmed',l:'g'},
+  {t:'Order book depth nominal',l:'g'},
+  {t:'847 orders/ms batch processed',l:'g'},
+  {t:'Spread widening +31% detected',l:'y'},
+  {t:'Cancel rate spike: 380% above avg',l:'o'},
+  {t:'Volatility threshold breached: 0.94%',l:'y'},
+  {t:'Flash crash pattern — HALT triggered',l:'r'},
+  {t:'CAM lookup resolved in 9ns',l:'g'},
+  {t:'Order book imbalance: 84% bids',l:'o'},
+  {t:'Circuit breaker reset — resuming',l:'g'},
+];
+const CBS={g:'#4ade80',y:'#facc15',o:'#fb923c',r:'#f87171'};
+const CBL={g:'GREEN — NORMAL',y:'YELLOW — CAUTION',o:'ORANGE — ALERT',r:'RED — HALTED'};
+let lg=[];
+function addAnom(){
+  const now=new Date(),ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+  const a=ANOMS[Math.floor(Math.random()*ANOMS.length)];
+  lg.unshift({...a,ts});if(lg.length>5)lg=lg.slice(0,5);
+  document.getElementById('ano-feed').innerHTML=lg.map(e=>`<div class="ano-item ${e.l}"><div class="ano-bar"></div><span class="ano-time">${e.ts}</span><span class="ano-txt">${e.t}</span></div>`).join('');
+  const cb=document.getElementById('cb-status');cb.style.color=CBS[lg[0].l];cb.textContent=CBL[lg[0].l];
+}
+addAnom();setInterval(addAnom,1900);
+
+// ── FAQ ──
+document.getElementById('faq-list').addEventListener('click',e=>{
+  const q=e.target.closest('.faq-q');if(!q)return;
+  const item=q.closest('.faq-item'),ans=item.querySelector('.faq-a'),open=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>{i.classList.remove('open');i.querySelector('.faq-a').style.maxHeight='0'});
+  if(!open){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px'}
+});
+</script>
+</body>
+</html>
