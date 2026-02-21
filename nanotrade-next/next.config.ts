@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig: NextConfig = {
-  /* config options here */
   output: 'export',
-  basePath: '/NanoTrade-website', // This tells Next.js where the site lives
+  // Only use the subfolder path when building for production (GitHub)
+  basePath: isProd ? '/NanoTrade-website' : '',
   images: {
     unoptimized: true,
   },
