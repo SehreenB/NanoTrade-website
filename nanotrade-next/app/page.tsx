@@ -572,39 +572,72 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-12 max-w-4xl mx-auto">
 
             <ScrollReveal delay={0.1}>
-              <div className="flex flex-col items-center group">
+              <a
+                href="https://ca.linkedin.com/in/sehreen-basara"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center group cursor-pointer"
+              >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-white/10 mb-4 group-hover:border-primary transition-colors relative bg-white/5">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent animate-pulse" />
-                  <img src={sehreenimg.src} alt="Sehreen Basara" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10" />
+                  <img
+                    src={sehreenimg.src}
+                    alt="Sehreen Basara"
+                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10"
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">Sehreen Basara</h3>
                 <p className="text-primary text-sm font-mono tracking-tight mb-3">Data and Simulations Engineer</p>
-                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">Builds real-time order book visualizations and market simulations. Expertise in data pipelines and latency analysis for the NanoTrade architecture.</p>
-              </div>
+                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">
+                  Builds real-time order book visualizations and market simulations. Expertise in data pipelines and latency analysis for the NanoTrade architecture.
+                </p>
+              </a>
             </ScrollReveal>
 
             <ScrollReveal delay={0.2}>
-              <div className="flex flex-col items-center group mt-8 md:mt-0">
+              <a
+                href="https://ca.linkedin.com/in/seeron-sivashankar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center group mt-8 md:mt-0 cursor-pointer"
+              >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-primary/50 mb-4 group-hover:border-primary transition-colors relative bg-white/5 shadow-[0_0_30px_rgba(0,113,227,0.3)]">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent animate-pulse" />
-                  <img src={seeronImg.src} alt="Seeron Sivashankar" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10" />
+                  <img
+                    src={seeronImg.src}
+                    alt="Seeron Sivashankar"
+                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10"
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">Seeron Sivashankar</h3>
                 <p className="text-primary text-sm font-mono tracking-tight mb-3">Core Product Engineer</p>
-                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">Initiated the concept design, the ASIC design, and Verilog implementation. Architected the order matching engine, CAM, and pipeline for sub-100ns execution.</p>
-              </div>
+                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">
+                  Initiated the concept design, the ASIC design, and Verilog implementation. Architected the order matching engine, CAM, and pipeline for sub-100ns execution.
+                </p>
+              </a>
             </ScrollReveal>
 
             <ScrollReveal delay={0.3}>
-              <div className="flex flex-col items-center group mt-8 md:mt-0">
+              <a
+                href="https://ca.linkedin.com/in/betul-cetintas"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center group mt-8 md:mt-0 cursor-pointer"
+              >
                 <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-2 border-white/10 mb-4 group-hover:border-primary transition-colors relative bg-white/5">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent animate-pulse" />
-                  <img src={betulimg.src} alt="Betul Cetintas" className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10" />
+                  <img
+                    src={betulimg.src}
+                    alt="Betul Cetintas"
+                    className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10"
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">Betul Cetintas</h3>
                 <p className="text-primary text-sm font-mono tracking-tight mb-3">Machine Learning and QA Engineer</p>
-                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">Designed the on-chip MLP for anomaly detection. Trained models on historical market data and validated 95%+ sensitivity across all 6 anomaly types.</p>
-              </div>
+                <p className="text-white/60 text-sm text-center max-w-xs leading-relaxed">
+                  Designed the on-chip MLP for anomaly detection. Trained models on historical market data and validated 95%+ sensitivity across all 6 anomaly types.
+                </p>
+              </a>
             </ScrollReveal>
 
           </div>
@@ -617,7 +650,7 @@ export default function Home() {
             <Fingerprint className="w-5 h-5 text-primary" />
             <span className="font-bold tracking-widest uppercase text-white">NanoTrade</span>
           </div>
-          <div className="text-white/50 mt-4 md:mt-0">© 2026 NanoTrade ASIC. Built for HFT Hackathon.</div>
+          <div className="text-white/50 mt-4 md:mt-0">© 2026 NanoTrade ASIC. Built for ASIC Hackathon.</div>
         </div>
       </footer>
 
