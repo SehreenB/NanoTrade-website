@@ -24,7 +24,8 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Install dependencies
-        run: cd nanotrade-next && npm install
+        run: cd nanotrade-next && npm install --legacy-peer-deps
+        
       - name: Build with Next.js
         run: cd nanotrade-next && npx next build
       - name: Upload artifact
